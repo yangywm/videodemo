@@ -149,6 +149,24 @@
                 title: '直播间 4 ',
                 src: 'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
             },
+            //
+            {
+                title: '直播间 5 ',
+                src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+            },
+            {
+                title: '直播间 6 ',
+                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+            },
+            {
+                title: '直播间 7 ',
+                src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+            },
+            {
+                title: '直播间 8 ',
+                src: 'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
+            },
+            //
             // 如需更多流，继续添加
         ];
         // 自动补足streamList到rowCount*colCount个
@@ -169,7 +187,7 @@
                 // 只显示前6位+...+后28位
                 let shortSrc = stream.src;
                 if (shortSrc && shortSrc.length > 40) {
-                    shortSrc = shortSrc.slice(0, 6) + '...' + shortSrc.slice(-28);
+                    shortSrc = shortSrc.slice(0, 6) + '...' + shortSrc.slice(-34);
                 }
                 container.innerHTML += `
                 <div class="stream-item">
