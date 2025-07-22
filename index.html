@@ -182,7 +182,7 @@
             container.innerHTML = '';
             for (let i = 0; i < rowCount * colCount; i++) {
                 const stream = streamList[i];
-                const streamId = `stream${i}`;
+                const streamId = `stream${i + 1}`; // 修复ID不匹配问题
                 const statusId = `status${i + 1}`;
                 // 只显示前6位+...+后28位
                 let shortSrc = stream.src;
@@ -217,6 +217,14 @@
         function initializePlayers() {
             for (let i = 0; i < rowCount * colCount; i++) {
                 const streamId = `stream${i + 1}`;
+                const stream = streamList[i];
+                
+                // 设置视频源
+                const sources = stream.src ? [{
+                    src: stream.src,
+                    type: 'application/x-mpegURL'
+                }] : [];
+                
                 players[streamId] = videojs(streamId, {
                     fluid: true,
                     responsive: true,
@@ -231,7 +239,7 @@
                         }
                     },
                     techOrder: ['html5'],
-                    sources: []
+                    sources: sources
                 });
                 players[streamId].on('loadstart', function() {
                     updateStatus(streamId, '加载中...');
@@ -248,8 +256,29 @@
                 players[streamId].on('ended', function() {
                     updateStatus(streamId, '播放结束');
                 });
-                players[streamId].on('error', function() {
-                    updateStatus(streamId, '播放错误');
+                players[streamId].on('error', function(e) {
+                    console.error(`播放器 ${streamId} 错误:`, e);
+                    const error = players[streamId].error();
+                    let errorMsg = '播放错误';
+                    if (error) {
+                        switch(error.code) {
+                            case 1:
+                                errorMsg = '播放错误: 用户中止';
+                                break;
+                            case 2:
+                                errorMsg = '播放错误: 网络错误';
+                                break;
+                            case 3:
+                                errorMsg = '播放错误: 解码错误';
+                                break;
+                            case 4:
+                                errorMsg = '播放错误: 不支持的格式';
+                                break;
+                            default:
+                                errorMsg = `播放错误: ${error.message || '未知错误'}`;
+                        }
+                    }
+                    updateStatus(streamId, errorMsg);
                 });
                 players[streamId].on('waiting', function() {
                     updateStatus(streamId, '缓冲中...');
@@ -305,8 +334,35 @@
         }
         document.addEventListener('DOMContentLoaded', function() {
             renderStreams();
-            initializePlayers();
+            // 延迟初始化播放器，确保DOM完全渲染
+            setTimeout(() => {
+                initializePlayers();
+                // 自动尝试加载有效的流
+                loadValidStreams();
+            }, 100);
         });
+        
+        // 加载有效的流
+        function loadValidStreams() {
+            Object.keys(players).forEach(streamId => {
+                const player = players[streamId];
+                const streamIndex = parseInt(streamId.replace('stream', '')) - 1;
+                const stream = streamList[streamIndex];
+                
+                if (stream && stream.src && player) {
+                    updateStatus(streamId, '检查流地址...');
+                    // 尝试加载流
+                    player.ready(() => {
+                        player.src({
+                            src: stream.src,
+                            type: 'application/x-mpegURL'
+                        });
+                    });
+                } else if (!stream.src) {
+                    updateStatus(streamId, '无流地址');
+                }
+            });
+        }
         window.addEventListener('beforeunload', function() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.dispose === 'function') {
@@ -316,4 +372,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
