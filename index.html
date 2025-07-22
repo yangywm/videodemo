@@ -119,54 +119,91 @@
         <button class="control-btn" onclick="muteAllStreams()">静音全部</button>
         <button class="control-btn" onclick="unmuteAllStreams()">取消静音</button>
     </div>
+    
+    <!-- 直播流地址输入区域 -->
+    <div class="stream-input-section" style="max-width: 1400px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h3 style="color: #333; margin-bottom: 15px;">🎯 添加直播流</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="streamUrlInput" placeholder="输入直播流地址 (支持HLS .m3u8, HTTP-FLV .flv, RTMP rtmp://)" 
+                   style="flex: 1; min-width: 300px; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <select id="streamTypeSelect" style="padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+                <option value="auto">自动检测</option>
+                <option value="hls">HLS (.m3u8)</option>
+                <option value="flv">HTTP-FLV (.flv)</option>
+                <option value="rtmp">RTMP (rtmp://)</option>
+            </select>
+            <input type="text" id="streamTitleInput" placeholder="直播间名称" 
+                   style="min-width: 150px; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <button onclick="addCustomStream()" class="control-btn">添加流</button>
+            <button onclick="resetStreams()" class="control-btn" style="background-color: #dc3545;">重置</button>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+            <strong>示例地址：</strong><br>
+            • HLS: https://example.com/live/stream.m3u8<br>
+            • HTTP-FLV: https://example.com/live/stream.flv<br>
+            • RTMP: rtmp://example.com/live/stream
+        </div>
+    </div>
     <div class="stream-container" id="streamContainer">
         <!-- 动态插入直播流卡片 -->
     </div>
     <!-- Video.js JavaScript -->
     <script src="https://vjs.zencdn.net/8.23.3/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.10.0/dist/videojs-http-streaming.min.js"></script>
+    
+    <!-- FLV.js for HTTP-FLV support (直播格式支持) -->
+    <script src="https://cdn.jsdelivr.net/npm/flv.js@1.6.2/dist/flv.min.js"></script>
+    
+    <!-- Video.js FLV plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/videojs-flvjs@1.1.0/dist/videojs-flvjs.min.js"></script>
     <script>
         // ====== 配置区 ======
         // 每行直播流数量
         const colCount = 4;
         // 行数变量（可随意更改）
         const rowCount = 2; // 你可以改成3、4等
-        // 直播流数据（如需更多流，补充即可）
+        // 直播流数据（支持多种格式：HLS、HTTP-FLV、RTMP等）
         const streamList = [
             {
-                title: '直播间 1 ',
+                title: '直播间 1',
                 src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                type: 'hls'
             },
             {
-                title: '直播间 2 ',
-                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+                title: '直播间 2',
+                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test.flv',
+                type: 'flv'
             },
             {
-                title: '直播间 3 ',
+                title: '直播间 3',
                 src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+                type: 'hls'
             },
             {
-                title: '直播间 4 ',
-                src: 'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
+                title: '直播间 4',
+                src: 'rtmp://live.hkstv.hk.lxdns.com/live/hks2',
+                type: 'rtmp'
             },
-            //
             {
-                title: '直播间 5 ',
+                title: '直播间 5',
                 src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                type: 'hls'
             },
             {
-                title: '直播间 6 ',
-                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+                title: '直播间 6',
+                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test.flv',
+                type: 'flv'
             },
             {
-                title: '直播间 7 ',
+                title: '直播间 7',
                 src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+                type: 'hls'
             },
             {
-                title: '直播间 8 ',
-                src: 'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
+                title: '直播间 8',
+                src: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1',
+                type: 'rtmp'
             },
-            //
             // 如需更多流，继续添加
         ];
         // 自动补足streamList到rowCount*colCount个
@@ -206,7 +243,8 @@
                     </video-js>
                     <div class="stream-info">
                         <strong>状态:</strong> <span id="${statusId}">准备就绪</span><br>
-                        <strong>直播流地址：</strong> <span class="stream-url" title="${stream.src}">${shortSrc}</span><br>
+                        <strong>流地址：</strong> <span class="stream-url" title="${stream.src}">${shortSrc}</span><br>
+                        <strong>流格式：</strong> <span style="color: #007bff; font-weight: bold;">${stream.type ? stream.type.toUpperCase() : 'HLS'}</span><br>
                     </div>
                 </div>
                 `;
@@ -219,28 +257,73 @@
                 const streamId = `stream${i + 1}`;
                 const stream = streamList[i];
                 
-                // 设置视频源
-                const sources = stream.src ? [{
-                    src: stream.src,
-                    type: 'application/x-mpegURL'
-                }] : [];
+                // 根据流类型设置视频源
+                let sources = [];
+                if (stream.src) {
+                    switch(stream.type) {
+                        case 'hls':
+                            sources = [{
+                                src: stream.src,
+                                type: 'application/x-mpegURL'
+                            }];
+                            break;
+                        case 'flv':
+                            sources = [{
+                                src: stream.src,
+                                type: 'video/x-flv'
+                            }];
+                            break;
+                        case 'rtmp':
+                            sources = [{
+                                src: stream.src,
+                                type: 'rtmp/mp4'
+                            }];
+                            break;
+                        default:
+                            sources = [{
+                                src: stream.src,
+                                type: 'application/x-mpegURL'
+                            }];
+                    }
+                }
                 
-                players[streamId] = videojs(streamId, {
+                // 根据流类型配置播放器
+                let playerConfig = {
                     fluid: true,
                     responsive: true,
                     playbackRates: [0.5, 1, 1.25, 1.5, 2],
                     controls: true,
                     preload: 'metadata',
-                    html5: {
+                    sources: sources
+                };
+                
+                // 针对不同格式的特殊配置
+                if (stream.type === 'flv') {
+                    playerConfig.techOrder = ['flvjs', 'html5'];
+                    playerConfig.flvjs = {
+                        mediaDataSource: {
+                            isLive: true,
+                            cors: true,
+                            withCredentials: false
+                        }
+                    };
+                } else if (stream.type === 'hls') {
+                    playerConfig.html5 = {
                         hls: {
                             enableLowInitialPlaylist: true,
                             smoothQualityChange: true,
                             overrideNative: true
                         }
-                    },
-                    techOrder: ['html5'],
-                    sources: sources
-                });
+                    };
+                    playerConfig.techOrder = ['html5'];
+                } else if (stream.type === 'rtmp') {
+                    playerConfig.techOrder = ['flash', 'html5'];
+                    playerConfig.flash = {
+                        swf: 'https://vjs.zencdn.net/swf/5.4.2/video-js.swf'
+                    };
+                }
+                
+                players[streamId] = videojs(streamId, playerConfig);
                 players[streamId].on('loadstart', function() {
                     updateStatus(streamId, '加载中...');
                 });
@@ -332,6 +415,125 @@
                 }
             });
         }
+        
+        // 添加自定义直播流
+        function addCustomStream() {
+            const urlInput = document.getElementById('streamUrlInput');
+            const typeSelect = document.getElementById('streamTypeSelect');
+            const titleInput = document.getElementById('streamTitleInput');
+            
+            const url = urlInput.value.trim();
+            const selectedType = typeSelect.value;
+            const title = titleInput.value.trim() || '自定义直播间';
+            
+            if (!url) {
+                alert('请输入直播流地址');
+                return;
+            }
+            
+            // 自动检测流格式
+            let streamType = selectedType === 'auto' ? detectStreamFormat(url) : selectedType;
+            
+            // 找到第一个空的流位置或添加到末尾
+            let targetIndex = -1;
+            for (let i = 0; i < streamList.length; i++) {
+                if (!streamList[i].src) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            
+            if (targetIndex === -1) {
+                // 如果没有空位置，替换第一个
+                targetIndex = 0;
+            }
+            
+            // 更新流列表
+            streamList[targetIndex] = {
+                title: `${title} (${streamType.toUpperCase()})`,
+                src: url,
+                type: streamType
+            };
+            
+            // 重新渲染和初始化
+            renderStreams();
+            setTimeout(() => {
+                initializePlayers();
+                loadValidStreams();
+            }, 100);
+            
+            // 清空输入框
+            urlInput.value = '';
+            titleInput.value = '';
+            typeSelect.value = 'auto';
+            
+            console.log(`添加了新的${streamType.toUpperCase()}流:`, url);
+        }
+        
+        // 重置为默认流
+        function resetStreams() {
+            if (confirm('确定要重置为默认的演示流吗？')) {
+                // 销毁现有播放器
+                Object.values(players).forEach(player => {
+                    if (player && typeof player.dispose === 'function') {
+                        player.dispose();
+                    }
+                });
+                players = {};
+                
+                // 重置为默认流列表
+                streamList.length = 0;
+                streamList.push(
+                    {
+                        title: '直播间 1',
+                        src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                        type: 'hls'
+                    },
+                    {
+                        title: '直播间 2',
+                        src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test.flv',
+                        type: 'flv'
+                    },
+                    {
+                        title: '直播间 3',
+                        src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+                        type: 'hls'
+                    },
+                    {
+                        title: '直播间 4',
+                        src: 'rtmp://live.hkstv.hk.lxdns.com/live/hks2',
+                        type: 'rtmp'
+                    },
+                    {
+                        title: '直播间 5',
+                        src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+                        type: 'hls'
+                    },
+                    {
+                        title: '直播间 6',
+                        src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test.flv',
+                        type: 'flv'
+                    },
+                    {
+                        title: '直播间 7',
+                        src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+                        type: 'hls'
+                    },
+                    {
+                        title: '直播间 8',
+                        src: 'rtmp://live.hkstv.hk.lxdns.com/live/hks1',
+                        type: 'rtmp'
+                    }
+                );
+                
+                // 重新渲染
+                renderStreams();
+                setTimeout(() => {
+                    initializePlayers();
+                    loadValidStreams();
+                }, 100);
+            }
+        }
         document.addEventListener('DOMContentLoaded', function() {
             renderStreams();
             // 延迟初始化播放器，确保DOM完全渲染
@@ -342,6 +544,24 @@
             }, 100);
         });
         
+        // 检测直播流格式
+        function detectStreamFormat(url) {
+            if (!url) return 'unknown';
+            
+            // 直播流格式检测
+            if (url.includes('.flv') || url.includes('flv')) {
+                return 'flv';
+            } else if (url.includes('.m3u8') || url.includes('hls')) {
+                return 'hls';
+            } else if (url.startsWith('rtmp://') || url.includes('rtmp')) {
+                return 'rtmp';
+            } else if (url.includes('webrtc') || url.includes('rtc')) {
+                return 'webrtc';
+            }
+            
+            return 'hls'; // 默认使用HLS
+        }
+        
         // 加载有效的流
         function loadValidStreams() {
             Object.keys(players).forEach(streamId => {
@@ -350,16 +570,79 @@
                 const stream = streamList[streamIndex];
                 
                 if (stream && stream.src && player) {
-                    updateStatus(streamId, '检查流地址...');
-                    // 尝试加载流
+                    updateStatus(streamId, `检查${stream.type ? stream.type.toUpperCase() : ''}流地址...`);
+                    
+                    // 根据流类型进行特殊处理
                     player.ready(() => {
-                        player.src({
-                            src: stream.src,
-                            type: 'application/x-mpegURL'
-                        });
+                        try {
+                            if (stream.type === 'flv') {
+                                // HTTP-FLV 流处理
+                                if (flvjs && flvjs.isSupported()) {
+                                    player.src({
+                                        src: stream.src,
+                                        type: 'video/x-flv'
+                                    });
+                                } else {
+                                    updateStatus(streamId, 'FLV格式不支持');
+                                    return;
+                                }
+                            } else if (stream.type === 'rtmp') {
+                                // RTMP 流处理
+                                player.src({
+                                    src: stream.src,
+                                    type: 'rtmp/mp4'
+                                });
+                            } else {
+                                // HLS 流处理
+                                player.src({
+                                    src: stream.src,
+                                    type: 'application/x-mpegURL'
+                                });
+                            }
+                            
+                            // 添加流格式特定的事件监听
+                            addStreamFormatListeners(player, streamId, stream.type);
+                            
+                        } catch (error) {
+                            console.error(`加载流 ${streamId} 失败:`, error);
+                            updateStatus(streamId, `加载失败: ${error.message}`);
+                        }
                     });
                 } else if (!stream.src) {
                     updateStatus(streamId, '无流地址');
+                }
+            });
+        }
+        
+        // 添加流格式特定的事件监听器
+        function addStreamFormatListeners(player, streamId, streamType) {
+            if (streamType === 'flv') {
+                // FLV 特定事件
+                player.on('flvjs-media-info', function(event, info) {
+                    console.log(`FLV媒体信息 ${streamId}:`, info);
+                });
+                
+                player.on('flvjs-statistics-info', function(event, info) {
+                    console.log(`FLV统计信息 ${streamId}:`, info);
+                });
+            } else if (streamType === 'rtmp') {
+                // RTMP 特定事件
+                player.on('flash-ready', function() {
+                    console.log(`RTMP Flash播放器就绪 ${streamId}`);
+                });
+            }
+            
+            // 通用网络状态监听
+            player.on('progress', function() {
+                const buffered = player.buffered();
+                if (buffered.length > 0) {
+                    const bufferedEnd = buffered.end(buffered.length - 1);
+                    const currentTime = player.currentTime();
+                    const bufferHealth = bufferedEnd - currentTime;
+                    
+                    if (bufferHealth < 1 && streamType === 'flv') {
+                        updateStatus(streamId, '缓冲不足');
+                    }
                 }
             });
         }
