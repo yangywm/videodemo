@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多直播流播放器</title>
+    <title>多直播间播放器</title>
     
     <!-- Video.js CSS -->
     <link href="https://vjs.zencdn.net/8.23.3/video-js.css" rel="stylesheet" />
@@ -16,30 +16,25 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
-        
         .header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
         .header h1 {
             color: #333;
             margin-bottom: 10px;
         }
-        
         .header p {
             color: #666;
             font-size: 16px;
         }
-        
         .stream-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
         }
-        
         .stream-item {
             background: white;
             border-radius: 10px;
@@ -47,12 +42,10 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
         }
-        
         .stream-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-        
         .stream-title {
             font-size: 18px;
             font-weight: bold;
@@ -60,12 +53,10 @@
             color: #333;
             text-align: center;
         }
-        
         .video-js {
             width: 100%;
             height: 300px;
         }
-        
         .stream-info {
             margin-top: 10px;
             padding: 10px;
@@ -74,12 +65,18 @@
             font-size: 14px;
             color: #666;
         }
-        
+        .stream-url {
+            display: block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow-x: auto;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
         .controls {
             text-align: center;
             margin: 20px 0;
         }
-        
         .control-btn {
             background-color: #007bff;
             color: white;
@@ -91,25 +88,20 @@
             font-size: 14px;
             transition: background-color 0.2s;
         }
-        
         .control-btn:hover {
             background-color: #0056b3;
         }
-        
         .control-btn:disabled {
             background-color: #6c757d;
             cursor: not-allowed;
         }
-        
         @media (max-width: 768px) {
             .stream-container {
                 grid-template-columns: 1fr;
             }
-            
             body {
                 padding: 10px;
             }
-            
             .video-js {
                 height: 250px;
             }
@@ -118,114 +110,95 @@
 </head>
 <body>
     <div class="header">
-        <h1>🔴 多直播流播放器</h1>
+        <h1>🔴 多直播间播放器</h1>
         <p>支持同时播放多个直播流，使用 Video.js 技术</p>
     </div>
-    
     <div class="controls">
         <button class="control-btn" onclick="playAllStreams()">播放全部</button>
         <button class="control-btn" onclick="pauseAllStreams()">暂停全部</button>
         <button class="control-btn" onclick="muteAllStreams()">静音全部</button>
         <button class="control-btn" onclick="unmuteAllStreams()">取消静音</button>
     </div>
-    
-    <div class="stream-container">
-        <!-- 直播流1 -->
-        <div class="stream-item">
-            <div class="stream-title">直播流 1 - X频道</div>
-            <video-js
-                id="stream1"
-                class="video-js vjs-default-skin"
-                controls
-                preload="auto"
-                data-setup='{}'>
-                <source src="https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" type="application/x-mpegURL">
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
-                </p>
-            </video-js>
-            <div class="stream-info">
-                <strong>状态:</strong> <span id="status1">准备就绪</span><br>
-            </div>
-        </div>
-        
-        <!-- 直播流2 -->
-        <div class="stream-item">
-            <div class="stream-title">直播流 2 - XX频道</div>
-            <video-js
-                id="stream2"
-                class="video-js vjs-default-skin"
-                controls
-                preload="auto"
-                data-setup='{}'>
-                <source src="https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" type="application/x-mpegURL">
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
-                </p>
-            </video-js>
-            <div class="stream-info">
-                <strong>状态:</strong> <span id="status2">准备就绪</span><br>
-            </div>
-        </div>
-        
-        <!-- 直播流3 -->
-        <div class="stream-item">
-            <div class="stream-title">直播流 3 - XXX频道</div>
-            <video-js
-                id="stream3"
-                class="video-js vjs-default-skin"
-                controls
-                preload="auto"
-                data-setup='{}'>
-                <source src="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8" type="application/x-mpegURL">
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
-                </p>
-            </video-js>
-            <div class="stream-info">
-                <strong>状态:</strong> <span id="status3">准备就绪</span><br>
-            </div>
-        </div>
-        
-        <!-- 直播流4 -->
-        <div class="stream-item">
-            <div class="stream-title">直播流 4 - XXXX频道</div>
-            <video-js
-                id="stream4"
-                class="video-js vjs-default-skin"
-                controls
-                preload="auto"
-                data-setup='{}'>
-                <source src="https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8" type="application/x-mpegURL">
-                <p class="vjs-no-js">
-                    To view this video please enable JavaScript, and consider upgrading to a web browser that
-                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
-                </p>
-            </video-js>
-            <div class="stream-info">
-                <strong>状态:</strong> <span id="status4">准备就绪</span><br>
-            </div>
-        </div>
+    <div class="stream-container" id="streamContainer">
+        <!-- 动态插入直播流卡片 -->
     </div>
-    
     <!-- Video.js JavaScript -->
     <script src="https://vjs.zencdn.net/8.23.3/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@videojs/http-streaming@3.10.0/dist/videojs-http-streaming.min.js"></script>
-    
-    <!-- 自定义脚本 -->
     <script>
-        // 存储所有播放器实例
+        // ====== 配置区 ======
+        // 每行直播流数量
+        const colCount = 4;
+        // 行数变量（可随意更改）
+        const rowCount = 2; // 你可以改成3、4等
+        // 直播流数据（如需更多流，补充即可）
+        const streamList = [
+            {
+                title: '直播间 1 ',
+                src: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+            },
+            {
+                title: '直播间 2 ',
+                src: 'https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8',
+            },
+            {
+                title: '直播间 3 ',
+                src: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+            },
+            {
+                title: '直播间 4 ',
+                src: 'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
+            },
+            // 如需更多流，继续添加
+        ];
+        // 自动补足streamList到rowCount*colCount个
+        while (streamList.length < rowCount * colCount) {
+            streamList.push({
+                title: `直播间 ${streamList.length + 1}`,
+                src: '', // 可留空或填默认流
+            });
+        }
+        // ====== 动态渲染直播流卡片 ======
+        function renderStreams() {
+            const container = document.getElementById('streamContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < rowCount * colCount; i++) {
+                const stream = streamList[i];
+                const streamId = `stream${i + 1}`;
+                const statusId = `status${i + 1}`;
+                // 只显示前6位+...+后28位
+                let shortSrc = stream.src;
+                if (shortSrc && shortSrc.length > 40) {
+                    shortSrc = shortSrc.slice(0, 6) + '...' + shortSrc.slice(-28);
+                }
+                container.innerHTML += `
+                <div class="stream-item">
+                    <div class="stream-title">${stream.title}</div>
+                    <video-js
+                        id="${streamId}"
+                        class="video-js vjs-default-skin"
+                        controls
+                        preload="auto"
+                        data-setup='{}'>
+                        ${stream.src ? `<source src="${stream.src}" type="application/x-mpegURL">` : ''}
+                        <p class="vjs-no-js">
+                            To view this video please enable JavaScript, and consider upgrading to a web browser that
+                            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                        </p>
+                    </video-js>
+                    <div class="stream-info">
+                        <strong>状态:</strong> <span id="${statusId}">准备就绪</span><br>
+                        <strong>直播流地址：</strong> <span class="stream-url" title="${stream.src}">${shortSrc}</span><br>
+                    </div>
+                </div>
+                `;
+            }
+        }
+        // ====== Video.js功能区 ======
         let players = {};
-        
-        // 初始化所有播放器
         function initializePlayers() {
-            const streamIds = ['stream1', 'stream2', 'stream3', 'stream4'];
-            
-            streamIds.forEach(streamId => {
-                // 初始化 Video.js 播放器
+            for (let i = 0; i < rowCount * colCount; i++) {
+                const streamId = `stream${i + 1}`;
                 players[streamId] = videojs(streamId, {
                     fluid: true,
                     responsive: true,
@@ -242,48 +215,36 @@
                     techOrder: ['html5'],
                     sources: []
                 });
-                
-                // 添加事件监听器
                 players[streamId].on('loadstart', function() {
                     updateStatus(streamId, '加载中...');
                 });
-                
                 players[streamId].on('canplay', function() {
                     updateStatus(streamId, '准备播放');
                 });
-                
                 players[streamId].on('playing', function() {
                     updateStatus(streamId, '正在播放');
                 });
-                
                 players[streamId].on('pause', function() {
                     updateStatus(streamId, '已暂停');
                 });
-                
                 players[streamId].on('ended', function() {
                     updateStatus(streamId, '播放结束');
                 });
-                
                 players[streamId].on('error', function() {
                     updateStatus(streamId, '播放错误');
                 });
-                
                 players[streamId].on('waiting', function() {
                     updateStatus(streamId, '缓冲中...');
                 });
-            });
+            }
         }
-        
-        // 更新播放状态
         function updateStatus(streamId, status) {
-            const statusElement = document.getElementById('status' + streamId.slice(-1));
+            const statusElement = document.getElementById('status' + streamId.replace('stream', ''));
             if (statusElement) {
                 statusElement.textContent = status;
                 statusElement.style.color = getStatusColor(status);
             }
         }
-        
-        // 根据状态获取颜色
         function getStatusColor(status) {
             switch(status) {
                 case '正在播放': return '#28a745';
@@ -294,8 +255,6 @@
                 default: return '#6c757d';
             }
         }
-        
-        // 播放全部流
         function playAllStreams() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.play === 'function') {
@@ -305,8 +264,6 @@
                 }
             });
         }
-        
-        // 暂停全部流
         function pauseAllStreams() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.pause === 'function') {
@@ -314,8 +271,6 @@
                 }
             });
         }
-        
-        // 静音全部流
         function muteAllStreams() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.muted === 'function') {
@@ -323,8 +278,6 @@
                 }
             });
         }
-        
-        // 取消静音全部流
         function unmuteAllStreams() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.muted === 'function') {
@@ -332,13 +285,10 @@
                 }
             });
         }
-        
-        // 页面加载完成后初始化播放器
         document.addEventListener('DOMContentLoaded', function() {
+            renderStreams();
             initializePlayers();
         });
-        
-        // 页面卸载时清理播放器
         window.addEventListener('beforeunload', function() {
             Object.values(players).forEach(player => {
                 if (player && typeof player.dispose === 'function') {
