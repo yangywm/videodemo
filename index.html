@@ -111,7 +111,7 @@
 <body>
     <div class="header">
         <h1>🔴 多直播间播放器</h1>
-        <p>支持同时播放多个直播流，使用 Video.js 技术</p>
+        <p>支持同时播放多个直播流</p>
     </div>
     <div class="controls">
         <button class="control-btn" onclick="playAllStreams()">播放全部</button>
@@ -182,7 +182,7 @@
             container.innerHTML = '';
             for (let i = 0; i < rowCount * colCount; i++) {
                 const stream = streamList[i];
-                const streamId = `stream${i + 1}`;
+                const streamId = `stream${i}`;
                 const statusId = `status${i + 1}`;
                 // 只显示前6位+...+后28位
                 let shortSrc = stream.src;
@@ -191,7 +191,7 @@
                 }
                 container.innerHTML += `
                 <div class="stream-item">
-                    <div class="stream-title">${stream.title}</div>
+                    <div class="stream-title">${stream.title} - ${streamId}</div>
                     <video-js
                         id="${streamId}"
                         class="video-js vjs-default-skin"
