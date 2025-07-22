@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多直播流播放器 - 简化版</title>
+    
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .stream-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .stream-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stream-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .video-js {
+            width: 100%;
+            height: 250px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎥 多视频播放器</h1>
+        <p>使用 Video.js 实现多视频同时播放</p>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" onclick="playAll()">播放全部</button>
+        <button class="btn" onclick="pauseAll()">暂停全部</button>
+        <button class="btn" onclick="muteAll()">静音全部</button>
+    </div>
+    
+    <div class="stream-container">
+        <div class="stream-item">
+            <div class="stream-title">视频流 1</div>
+            <video
+                id="player1"
+                class="video-js vjs-default-skin"
+                controls
+                preload="auto"
+                width="100%"
+                height="250"
+                data-setup="{}">
+                <source src="https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4" type="video/mp4">
+                <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+                <p>您的浏览器不支持视频播放</p>
+            </video>
+            <div class="status" id="status1">准备就绪</div>
+        </div>
+        
+        <div class="stream-item">
+            <div class="stream-title">视频流 2</div>
+            <video
+                id="player2"
+                class="video-js vjs-default-skin"
+                controls
+                preload="auto"
+                width="100%"
+                height="250"
+                data-setup="{}">
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                <source src="https://html5demos.com/assets/dizzy.mp4" type="video/mp4">
+                <p>您的浏览器不支持视频播放</p>
+            </video>
+            <div class="status" id="status2">准备就绪</div>
+        </div>
+        
+        <div class="stream-item">
+            <div class="stream-title">视频流 3</div>
+            <video
+                id="player3"
+                class="video-js vjs-default-skin"
+                controls
+                preload="auto"
+                width="100%"
+                height="250"
+                data-setup="{}">
+                <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+                <source src="https://www.html5rocks.com/en/tutorials/video/basics/devstories.mp4" type="video/mp4">
+                <p>您的浏览器不支持视频播放</p>
+            </video>
+            <div class="status" id="status3">准备就绪</div>
+        </div>
+        
+        <div class="stream-item">
+            <div class="stream-title">视频流 4</div>
+            <video
+                id="player4"
+                class="video-js vjs-default-skin"
+                controls
+                preload="auto"
+                width="100%"
+                height="250"
+                data-setup="{}">
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                <source src="https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4" type="video/mp4">
+                <p>您的浏览器不支持视频播放</p>
+            </video>
+            <div class="status" id="status4">准备就绪</div>
+        </div>
+    </div>
+    
+    <!-- Video.js JavaScript -->
+    <script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
+    
+    <script>
+        let players = {};
+        
+        // 初始化所有播放器
+        function initPlayers() {
+            for (let i = 1; i <= 4; i++) {
+                const playerId = `player${i}`;
+                
+                try {
+                    players[playerId] = videojs(playerId, {
+                        controls: true,
+                        fluid: true,
+                        responsive: true
+                    });
+                    
+                    // 添加事件监听
+                    players[playerId].on('loadstart', () => updateStatus(i, '加载中...'));
+                    players[playerId].on('canplay', () => updateStatus(i, '可以播放'));
+                    players[playerId].on('playing', () => updateStatus(i, '正在播放 ▶️'));
+                    players[playerId].on('pause', () => updateStatus(i, '已暂停 ⏸️'));
+                    players[playerId].on('ended', () => updateStatus(i, '播放完成 ✅'));
+                    players[playerId].on('error', () => updateStatus(i, '播放错误 ❌'));
+                    players[playerId].on('waiting', () => updateStatus(i, '缓冲中... ⏳'));
+                    
+                    console.log(`播放器 ${i} 初始化成功`);
+                } catch (error) {
+                    console.error(`播放器 ${i} 初始化失败:`, error);
+                    updateStatus(i, '初始化失败 ❌');
+                }
+            }
+        }
+        
+        // 更新状态显示
+        function updateStatus(playerNum, status) {
+            const statusEl = document.getElementById(`status${playerNum}`);
+            if (statusEl) {
+                statusEl.textContent = status;
+            }
+        }
+        
+        // 播放所有视频
+        function playAll() {
+            Object.values(players).forEach(player => {
+                if (player && typeof player.play === 'function') {
+                    player.play().catch(err => {
+                        console.log('播放失败:', err.message);
+                    });
+                }
+            });
+        }
+        
+        // 暂停所有视频
+        function pauseAll() {
+            Object.values(players).forEach(player => {
+                if (player && typeof player.pause === 'function') {
+                    player.pause();
+                }
+            });
+        }
+        
+        // 静音所有视频
+        function muteAll() {
+            Object.values(players).forEach(player => {
+                if (player && typeof player.muted === 'function') {
+                    const isMuted = player.muted();
+                    player.muted(!isMuted);
+                }
+            });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('开始初始化播放器...');
+            initPlayers();
+        });
+        
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', function() {
+            Object.values(players).forEach(player => {
+                if (player && typeof player.dispose === 'function') {
+                    player.dispose();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
