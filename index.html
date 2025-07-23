@@ -54,8 +54,8 @@
             text-align: center;
         }
         .video-js {
-            width: 100%;
-            height: 300px;
+            width: 100% !important;
+            height: 300px !important;
         }
         .stream-info {
             margin-top: 10px;
@@ -161,7 +161,7 @@
         // 每行直播流数量
         const colCount = 4;
         // 行数变量（可随意更改）
-        const rowCount = 2; // 你可以改成3、4等
+        let rowCount = 2; // 你可以改成3、4等
         // 直播流数据（支持多种格式：HLS、HTTP-FLV、RTMP等）
         const streamList = [
             {
@@ -228,7 +228,7 @@
                 }
                 container.innerHTML += `
                 <div class="stream-item">
-                    <div class="stream-title">${stream.title} - ${streamId}</div>
+                    <div class="stream-title">${streamId} - ${stream.title}</div>
                     <video-js
                         id="${streamId}"
                         class="video-js vjs-default-skin"
@@ -288,14 +288,16 @@
                 }
                 
                 // 根据流类型配置播放器
-                let playerConfig = {
-                    fluid: true,
-                    responsive: true,
-                    playbackRates: [0.5, 1, 1.25, 1.5, 2],
-                    controls: true,
-                    preload: 'metadata',
-                    sources: sources
-                };
+            let playerConfig = {
+                fluid: false,
+                responsive: false,
+                width: '100%',
+                height: 300,
+                playbackRates: [0.5, 1, 1.25, 1.5, 2],
+                controls: true,
+                preload: 'metadata',
+                sources: sources
+            };
                 
                 // 针对不同格式的特殊配置
                 if (stream.type === 'flv') {
@@ -434,32 +436,80 @@
             // 自动检测流格式
             let streamType = selectedType === 'auto' ? detectStreamFormat(url) : selectedType;
             
-            // 找到第一个空的流位置或添加到末尾
-            let targetIndex = -1;
-            for (let i = 0; i < streamList.length; i++) {
-                if (!streamList[i].src) {
-                    targetIndex = i;
-                    break;
-                }
-            }
-            
-            if (targetIndex === -1) {
-                // 如果没有空位置，替换第一个
-                targetIndex = 0;
-            }
-            
-            // 更新流列表
-            streamList[targetIndex] = {
+            // 创建新流对象
+            const newStream = {
                 title: `${title} (${streamType.toUpperCase()})`,
                 src: url,
                 type: streamType
             };
             
-            // 重新渲染和初始化
-            renderStreams();
+            // 计算新流位置 - 新流直接从第3行开始（第9个位置）
+            let newStreamIndex;
+            
+            // 如果streamList长度小于8（前2行），需要先补足到8个位置
+            while (streamList.length < 8) {
+                streamList.push({
+                    title: `直播间 ${streamList.length + 1}`,
+                    src: '',
+                    type: 'hls'
+                });
+            }
+            
+            // 确保至少有3行
+            if (rowCount < 3) {
+                rowCount = 3;
+            }
+            
+            // 新流添加到streamList末尾（从第9个位置开始）
+            newStreamIndex = streamList.length;
+            streamList.push(newStream);
+            
+            // 动态调整行数以容纳新流
+            const neededRows = Math.ceil(streamList.length / colCount);
+            if (neededRows > rowCount) {
+                rowCount = neededRows;
+            }
+            
+            // 只添加新的DOM元素，不重新渲染整个页面
+            const container = document.getElementById('streamContainer');
+            const newStreamId = `stream${newStreamIndex + 1}`;
+            const statusId = `status${newStreamIndex + 1}`;
+            
+            // 创建新的流DOM元素
+            const streamElement = document.createElement('div');
+            streamElement.className = 'stream-item';
+            
+            let shortSrc = newStream.src;
+            if (shortSrc && shortSrc.length > 40) {
+                shortSrc = shortSrc.slice(0, 6) + '...' + shortSrc.slice(-34);
+            }
+            
+            streamElement.innerHTML = `
+                <div class="stream-title">${newStreamId} - ${newStream.title}</div>
+                <video-js
+                    id="${newStreamId}"
+                    class="video-js vjs-default-skin"
+                    controls
+                    preload="auto"
+                    data-setup='{}'>
+                    ${newStream.src ? `<source src="${newStream.src}" type="application/x-mpegURL">` : ''}
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                    </p>
+                </video-js>
+                <div class="stream-info">
+                    <strong>状态:</strong> <span id="${statusId}">准备就绪</span><br>
+                    <strong>流地址：</strong> <span class="stream-url" title="${newStream.src}">${shortSrc}</span><br>
+                    <strong>流格式：</strong> <span style="color: #007bff; font-weight: bold;">${newStream.type ? newStream.type.toUpperCase() : 'HLS'}</span><br>
+                </div>
+            `;
+            
+            container.appendChild(streamElement);
+            
+            // 只初始化新添加的播放器
             setTimeout(() => {
-                initializePlayers();
-                loadValidStreams();
+                initializePlayer(newStreamId, newStream);
             }, 100);
             
             // 清空输入框
@@ -468,6 +518,158 @@
             typeSelect.value = 'auto';
             
             console.log(`添加了新的${streamType.toUpperCase()}流:`, url);
+        }
+        
+        // 初始化单个播放器
+        function initializePlayer(streamId, stream) {
+            // 根据流类型设置视频源
+            let sources = [];
+            if (stream.src) {
+                switch(stream.type) {
+                    case 'hls':
+                        sources = [{
+                            src: stream.src,
+                            type: 'application/x-mpegURL'
+                        }];
+                        break;
+                    case 'flv':
+                        sources = [{
+                            src: stream.src,
+                            type: 'video/x-flv'
+                        }];
+                        break;
+                    case 'rtmp':
+                        sources = [{
+                            src: stream.src,
+                            type: 'rtmp/mp4'
+                        }];
+                        break;
+                    default:
+                        sources = [{
+                            src: stream.src,
+                            type: 'application/x-mpegURL'
+                        }];
+                }
+            }
+            
+            // 根据流类型配置播放器
+            let playerConfig = {
+                fluid: false,
+                responsive: false,
+                width: '100%',
+                height: 300,
+                playbackRates: [0.5, 1, 1.25, 1.5, 2],
+                controls: true,
+                preload: 'metadata',
+                sources: sources
+            };
+            
+            // 针对不同格式的特殊配置
+            if (stream.type === 'flv') {
+                playerConfig.techOrder = ['flvjs', 'html5'];
+                playerConfig.flvjs = {
+                    mediaDataSource: {
+                        isLive: true,
+                        cors: true,
+                        withCredentials: false
+                    }
+                };
+            } else if (stream.type === 'hls') {
+                playerConfig.html5 = {
+                    hls: {
+                        enableLowInitialPlaylist: true,
+                        smoothQualityChange: true,
+                        overrideNative: true
+                    }
+                };
+                playerConfig.techOrder = ['html5'];
+            } else if (stream.type === 'rtmp') {
+                playerConfig.techOrder = ['flash', 'html5'];
+                playerConfig.flash = {
+                    swf: 'https://vjs.zencdn.net/swf/5.4.2/video-js.swf'
+                };
+            }
+            
+            players[streamId] = videojs(streamId, playerConfig);
+            players[streamId].on('loadstart', function() {
+                updateStatus(streamId, '加载中...');
+            });
+            players[streamId].on('canplay', function() {
+                updateStatus(streamId, '准备播放');
+            });
+            players[streamId].on('playing', function() {
+                updateStatus(streamId, '正在播放');
+            });
+            players[streamId].on('pause', function() {
+                updateStatus(streamId, '已暂停');
+            });
+            players[streamId].on('ended', function() {
+                updateStatus(streamId, '播放结束');
+            });
+            players[streamId].on('error', function(e) {
+                console.error(`播放器 ${streamId} 错误:`, e);
+                const error = players[streamId].error();
+                let errorMsg = '播放错误';
+                if (error) {
+                    switch(error.code) {
+                        case 1:
+                            errorMsg = '播放错误: 用户中止';
+                            break;
+                        case 2:
+                            errorMsg = '播放错误: 网络错误';
+                            break;
+                        case 3:
+                            errorMsg = '播放错误: 解码错误';
+                            break;
+                        case 4:
+                            errorMsg = '播放错误: 不支持的格式';
+                            break;
+                        default:
+                            errorMsg = `播放错误: ${error.message || '未知错误'}`;
+                    }
+                }
+                updateStatus(streamId, errorMsg);
+            });
+            players[streamId].on('waiting', function() {
+                updateStatus(streamId, '缓冲中...');
+            });
+            
+            // 自动加载流
+            if (stream.src) {
+                updateStatus(streamId, `检查${stream.type ? stream.type.toUpperCase() : ''}流地址...`);
+                
+                players[streamId].ready(() => {
+                    try {
+                        if (stream.type === 'flv') {
+                            if (flvjs && flvjs.isSupported()) {
+                                players[streamId].src({
+                                    src: stream.src,
+                                    type: 'video/x-flv'
+                                });
+                            } else {
+                                updateStatus(streamId, 'FLV格式不支持');
+                                return;
+                            }
+                        } else if (stream.type === 'rtmp') {
+                            players[streamId].src({
+                                src: stream.src,
+                                type: 'rtmp/mp4'
+                            });
+                        } else {
+                            players[streamId].src({
+                                src: stream.src,
+                                type: 'application/x-mpegURL'
+                            });
+                        }
+                        
+                        addStreamFormatListeners(players[streamId], streamId, stream.type);
+                        
+                    } catch (error) {
+                        console.error(`加载流 ${streamId} 失败:`, error);
+                        updateStatus(streamId, `加载失败: ${error.message}`);
+                    }
+                });
+            }
         }
         
         // 重置为默认流
