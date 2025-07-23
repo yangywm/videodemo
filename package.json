@@ -10,5 +10,8 @@
   "description": "",
   "dependencies": {
     "@mt/types-kayn": "1.15.26"
+  },
+  "devDependencies": {
+    "types-kayn": "^1.15.26"
   }
 }

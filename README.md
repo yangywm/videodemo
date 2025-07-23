@@ -177,3 +177,27 @@ MIT License - 可自由使用和修改
 - Video.js 7.x
 - CSS Grid & Flexbox
 - Vanilla JavaScript (ES6+) # videodemo
+
+## What's New in This Deployment
+### 🎯 Enhanced Live Streaming Support
+- ✅ Multi-Protocol Support : HLS, HTTP-FLV, RTMP, and WebRTC/RTM
+- ✅ TikTok/Douyin Live Stream Compatibility : Optimized for popular live streaming platforms
+- ✅ Automatic Format Detection : Smart protocol selection based on stream URL
+- ✅ Dynamic Stream Management : Add/remove streams in real-time
+### 🔧 Technical Improvements
+- ✅ FLV.js Integration : Low-latency FLV stream playback
+- ✅ WebRTC Support : Ultra-low latency streaming (1-3 seconds)
+- ✅ Enhanced Error Handling : Protocol-specific error messages
+- ✅ Network Quality Monitoring : Real-time bandwidth and latency tracking
+### 📱 User Experience
+- ✅ Stream Management Panel : Easy stream addition and control
+- ✅ Quality Indicators : Visual feedback for stream health
+- ✅ Responsive Design : Works seamlessly on desktop and mobile
+- ✅ Batch Controls : Play/pause/mute all streams simultaneously
+## Key Features Available
+- 8 simultaneous video streams in a responsive grid layout
+- Real-time status monitoring for each stream
+- Cross-platform compatibility with modern browsers
+- Adaptive streaming with automatic quality adjustment
+- Professional-grade error diagnostics for troubleshooting
+Your enhanced video player is now ready to handle live streams from TikTok, Douyin, and other major platforms. Share the URL to demonstrate the powerful multi-stream capabilities with low-latency playback support!
