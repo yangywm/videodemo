@@ -1,17 +1,13 @@
 {
-  "name": "demo",
+  "name": "videodemo",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Multi-livestream video player with enhanced streaming support",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "python3 -m http.server 8000",
+    "test": "echo \"No tests specified\" && exit 0"
   },
+  "keywords": ["video", "streaming", "player", "live", "hls", "flv"],
   "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@mt/types-kayn": "1.15.26"
-  },
-  "devDependencies": {
-    "types-kayn": "^1.15.26"
-  }
+  "license": "MIT"
 }
